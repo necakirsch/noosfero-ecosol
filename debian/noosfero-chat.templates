@@ -1,0 +1,8 @@
+Template: noosfero-chat/domain
+Type: string
+Description: Domain name for your noosfero site
+ Enter the domain name that is used for your Noosfero site. This domain
+ name will be automatically added to Ejabberd config.
+ .
+ If you do not enter a domain name here, you will have to make some further
+ manual configuration to have your chat server properly configured.

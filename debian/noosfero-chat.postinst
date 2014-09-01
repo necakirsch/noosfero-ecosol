@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+db_get noosfero-chat/domain
+
+ejabberd_config='/etc/ejabberd/ejabberd.cfg'
+
+if [ -f $ejabberd_config ] then
+  sed -i "s/mydomain.example.com/$RET/"
+fi
+
+
+#DEBHELPER#
