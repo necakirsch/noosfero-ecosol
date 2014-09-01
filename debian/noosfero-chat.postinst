@@ -17,5 +17,7 @@ if which update-noosfero-odbc >/dev/null; then
   update-noosfero-odbc
 fi
 
+sed -i "s/#\?SMP=.*/SMP=auto/" /etc/default/ejabberd
+sed -i "s/#\?POLL=.*/POLL=true/" /etc/default/ejabberd
 
 #DEBHELPER#
