@@ -36,4 +36,14 @@ if ! cat $limits | grep "^ *ejabberd *soft *nofile *65536" > /dev/null; then
   echo "$eof" >> $limits
 fi
 
+sites_available='/etc/apache2/sites-available/noosfero'
+pattern='RewriteEngine On'
+if ! cat $sites_available | grep "^ *$pattern" > /dev/null; then
+  echo "$pattern" >> $sites_available
+fi
+pattern='Include /usr/share/noosfero/util/chat/apache/xmpp.conf'
+if ! cat $sites_available | grep "^ *$pattern" > /dev/null; then
+  echo "$pattern" >> $sites_available
+fi
+
 #DEBHELPER#
