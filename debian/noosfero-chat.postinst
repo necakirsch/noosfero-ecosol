@@ -20,4 +20,20 @@ fi
 sed -i "s/#\?SMP=.*/SMP=auto/" /etc/default/ejabberd
 sed -i "s/#\?POLL=.*/POLL=true/" /etc/default/ejabberd
 
+limits='/etc/security/limits.conf'
+eof='# End of file'
+hard='ejabberd       hard    nofile  65536'
+soft='ejabberd       soft    nofile  65536'
+
+if ! cat $limits | grep "^ *ejabberd *hard *nofile *65536" > /dev/null; then
+  sed -i "/$eof/d" $limits
+  echo "$hard" >> $limits
+  echo "$eof" >> $limits
+fi
+if ! cat $limits | grep "^ *ejabberd *soft *nofile *65536" > /dev/null; then
+  sed -i "/$eof/d" $limits
+  echo "$soft" >> $limits
+  echo "$eof" >> $limits
+fi
+
 #DEBHELPER#
