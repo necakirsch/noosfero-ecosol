@@ -9,7 +9,8 @@ db_get noosfero-chat/domain
 ejabberd_config='/etc/ejabberd/ejabberd.cfg'
 
 if test -f $ejabberd_config; then
-  sed -i "s/mydomain.example.com/$RET/" /etc/ejabberd/ejabberd.cfg
+  sed -i "s/acl, *\([^,]*\), *{user, *\([^,]*\), *[^}]*/acl, \1, {user, \2, \"$RET\"/" /etc/ejabberd/ejabberd.cfg
+  sed -i "s/hosts, *\[[^]]*/hosts, [\"$RET\"/" /etc/ejabberd/ejabberd.cfg
 fi
 
 #DEBHELPER#
