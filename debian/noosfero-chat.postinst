@@ -13,4 +13,9 @@ if test -f $ejabberd_config; then
   sed -i "s/hosts, *\[[^]]*/hosts, [\"$RET\"/" /etc/ejabberd/ejabberd.cfg
 fi
 
+if which update-noosfero-odbc >/dev/null; then
+  update-noosfero-odbc
+fi
+
+
 #DEBHELPER#
