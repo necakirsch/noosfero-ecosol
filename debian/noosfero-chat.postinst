@@ -7,7 +7,6 @@ set -e
 db_get noosfero-chat/domain
 
 ejabberd_config='/etc/ejabberd/ejabberd.cfg'
-
 if test -f $ejabberd_config; then
   sed -i "s/acl, *\([^,]*\), *{user, *\([^,]*\), *[^}]*/acl, \1, {user, \2, \"$RET\"/" /etc/ejabberd/ejabberd.cfg
   sed -i "s/hosts, *\[[^]]*/hosts, [\"$RET\"/" /etc/ejabberd/ejabberd.cfg
@@ -19,13 +18,13 @@ fi
 
 ejabberd_default='/etc/default/ejabberd'
 noosfero_chat_default='/etc/default/noosfero-chat'
-if ! cat $ejabberd_default | grep "^\. $noosfero_chat_default" > /dev/null ; then
-  echo 'Extending ejabberd defaults with noosfero-chat defaults...'
-  echo ". $noosfero_chat_default" >> $ejabberd_default
+if test -f $ejabberd_default; then
+  if ! cat $ejabberd_default | grep "^\. $noosfero_chat_default" > /dev/null ; then
+    echo 'Extending ejabberd defaults with noosfero-chat defaults ...'
+    echo ". $noosfero_chat_default" >> $ejabberd_default
+  fi
 fi
 
-#sed -i "s/#\?SMP=.*/SMP=auto/" /etc/default/ejabberd
-#sed -i "s/#\?POLL=.*/POLL=true/" /etc/default/ejabberd
 #
 #limits='/etc/security/limits.conf'
 #eof='# End of file'
