@@ -17,33 +17,40 @@ if which update-noosfero-odbc >/dev/null; then
   update-noosfero-odbc
 fi
 
-sed -i "s/#\?SMP=.*/SMP=auto/" /etc/default/ejabberd
-sed -i "s/#\?POLL=.*/POLL=true/" /etc/default/ejabberd
+ejabberd_default='/etc/default/ejabberd'
+noosfero_chat_default='/etc/default/noosfero-chat'
 
-limits='/etc/security/limits.conf'
-eof='# End of file'
-hard='ejabberd       hard    nofile  65536'
-soft='ejabberd       soft    nofile  65536'
-
-if ! cat $limits | grep "^ *ejabberd *hard *nofile *65536" > /dev/null; then
-  sed -i "/$eof/d" $limits
-  echo "$hard" >> $limits
-  echo "$eof" >> $limits
-fi
-if ! cat $limits | grep "^ *ejabberd *soft *nofile *65536" > /dev/null; then
-  sed -i "/$eof/d" $limits
-  echo "$soft" >> $limits
-  echo "$eof" >> $limits
+if ! cat $ejabberd_default | grep "^\. $noosfero_chat_default" > /dev/null ; then
+  echo ". $noosfero_chat_default" >> $ejabberd_default
 fi
 
-sites_available='/etc/apache2/sites-available/noosfero'
-pattern='RewriteEngine On'
-if ! cat $sites_available | grep "^ *$pattern" > /dev/null; then
-  echo "$pattern" >> $sites_available
-fi
-pattern='Include /usr/share/noosfero/util/chat/apache/xmpp.conf'
-if ! cat $sites_available | grep "^ *$pattern" > /dev/null; then
-  echo "$pattern" >> $sites_available
-fi
+#sed -i "s/#\?SMP=.*/SMP=auto/" /etc/default/ejabberd
+#sed -i "s/#\?POLL=.*/POLL=true/" /etc/default/ejabberd
+#
+#limits='/etc/security/limits.conf'
+#eof='# End of file'
+#hard='ejabberd       hard    nofile  65536'
+#soft='ejabberd       soft    nofile  65536'
+#
+#if ! cat $limits | grep "^ *ejabberd *hard *nofile *65536" > /dev/null; then
+#  sed -i "/$eof/d" $limits
+#  echo "$hard" >> $limits
+#  echo "$eof" >> $limits
+#fi
+#if ! cat $limits | grep "^ *ejabberd *soft *nofile *65536" > /dev/null; then
+#  sed -i "/$eof/d" $limits
+#  echo "$soft" >> $limits
+#  echo "$eof" >> $limits
+#fi
+#
+#sites_available='/etc/apache2/sites-available/noosfero'
+#pattern='RewriteEngine On'
+#if ! cat $sites_available | grep "^ *$pattern" > /dev/null; then
+#  echo "$pattern" >> $sites_available
+#fi
+#pattern='Include /usr/share/noosfero/util/chat/apache/xmpp.conf'
+#if ! cat $sites_available | grep "^ *$pattern" > /dev/null; then
+#  echo "$pattern" >> $sites_available
+#fi
 
 #DEBHELPER#

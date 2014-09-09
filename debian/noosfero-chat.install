@@ -1,2 +1,3 @@
-util/chat/ejabberd.cfg         etc/ejabberd/
-debian/update-noosfero-odbc    usr/sbin
+debian/default/noosfero-chat    etc/default
+util/chat/ejabberd.cfg          etc/ejabberd
+debian/update-noosfero-odbc     usr/sbin
