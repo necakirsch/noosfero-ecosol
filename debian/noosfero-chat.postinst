@@ -15,6 +15,8 @@ fi
 echo 'Creating ejabberd schema ...'
 . /etc/default/noosfero
 noosfero_user="$NOOSFERO_USER"
+#FIXME Will probably need to prompt database name or move this code to a
+#      noosfero script to get database name from the config file...
 su - postgres -c "psql -c 'GRANT CREATE ON DATABASE noosfero TO $noosfero_user;' > /dev/null"
 su - $noosfero_user -c 'rails dbconsole production < /usr/share/noosfero/util/chat/postgresql/ejabberd.sql > /dev/null'
 
