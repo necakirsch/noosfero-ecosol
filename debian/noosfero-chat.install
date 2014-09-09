@@ -1,7 +1,7 @@
-debian/default/noosfero-chat                              etc/default
-util/chat/ejabberd.cfg                                    etc/ejabberd
-debian/update-noosfero-odbc                               usr/bin
-etc/security/limits.d/noosfero-chat.conf                  etc/security/limits.d
-etc/pam.d/noosfero-chat                                   etc/pam.d
-etc/apache2/sites-available/noosfero.d/noosfero-chat      debian/apache2/sites-available/noosfero.d
-etc/apache2/conf.d/noosfero-chat                          etc/apache2/conf.d
+debian/default/noosfero-chat                                  etc/default
+util/chat/ejabberd.cfg                                        etc/ejabberd
+debian/update-noosfero-odbc                                   usr/bin
+etc/security/limits.d/noosfero-chat.conf                      etc/security/limits.d
+etc/pam.d/noosfero-chat                                       etc/pam.d
+debian/apache2/sites-available/noosfero.d/noosfero-chat       etc/apache2/sites-available/noosfero.d
+debian/apache2/conf.d/noosfero-chat                           etc/apache2/conf.d
