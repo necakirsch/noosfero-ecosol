@@ -25,23 +25,7 @@ if test -f $ejabberd_default; then
   fi
 fi
 
-#
-#limits='/etc/security/limits.conf'
-#eof='# End of file'
-#hard='ejabberd       hard    nofile  65536'
-#soft='ejabberd       soft    nofile  65536'
-#
-#if ! cat $limits | grep "^ *ejabberd *hard *nofile *65536" > /dev/null; then
-#  sed -i "/$eof/d" $limits
-#  echo "$hard" >> $limits
-#  echo "$eof" >> $limits
-#fi
-#if ! cat $limits | grep "^ *ejabberd *soft *nofile *65536" > /dev/null; then
-#  sed -i "/$eof/d" $limits
-#  echo "$soft" >> $limits
-#  echo "$eof" >> $limits
-#fi
-#
+
 #sites_available='/etc/apache2/sites-available/noosfero'
 #pattern='RewriteEngine On'
 #if ! cat $sites_available | grep "^ *$pattern" > /dev/null; then
