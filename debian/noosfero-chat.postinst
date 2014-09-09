@@ -25,4 +25,10 @@ if test -f $ejabberd_default; then
   fi
 fi
 
+a2enmod proxy_http
+
+invoke-rc.d ejabberd restart
+invoke-rc.d noosfero restart
+invoke-rc.d apache2  restart
+
 #DEBHELPER#
