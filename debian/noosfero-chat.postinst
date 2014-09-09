@@ -37,4 +37,8 @@ invoke-rc.d ejabberd restart
 invoke-rc.d noosfero restart
 invoke-rc.d apache2  restart
 
+# stop debconf to avoid the problem with infinite hanging, cfe
+# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=295477
+db_stop
+
 #DEBHELPER#
