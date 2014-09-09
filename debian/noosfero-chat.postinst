@@ -19,8 +19,8 @@ fi
 
 ejabberd_default='/etc/default/ejabberd'
 noosfero_chat_default='/etc/default/noosfero-chat'
-
 if ! cat $ejabberd_default | grep "^\. $noosfero_chat_default" > /dev/null ; then
+  echo 'Extending ejabberd defaults with noosfero-chat defaults...'
   echo ". $noosfero_chat_default" >> $ejabberd_default
 fi
 
