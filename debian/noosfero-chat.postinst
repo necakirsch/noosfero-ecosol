@@ -12,7 +12,13 @@ if test -f $ejabberd_config; then
   sed -i "s/hosts, *\[[^]]*/hosts, [\"$RET\"/" /etc/ejabberd/ejabberd.cfg
 fi
 
-if which update-noosfero-odbc >/dev/null; then
+echo 'Creating ejabberd schema ...'
+. /etc/default/noosfero
+noosfero_user="$NOOSFERO_USER"
+su - postgres -c "psql -c 'GRANT CREATE ON DATABASE noosfero TO $noosfero_user;' > /dev/null"
+su - $noosfero_user -c 'rails dbconsole production < /usr/share/noosfero/util/chat/postgresql/ejabberd.sql > /dev/null'
+
+if which update-noosfero-odbc > /dev/null ; then
   update-noosfero-odbc
 fi
 
