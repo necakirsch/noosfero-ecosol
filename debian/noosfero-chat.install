@@ -1,3 +1,4 @@
-debian/default/noosfero-chat    etc/default
-util/chat/ejabberd.cfg          etc/ejabberd
-debian/update-noosfero-odbc     usr/bin
+debian/default/noosfero-chat            etc/default
+util/chat/ejabberd.cfg                  etc/ejabberd
+debian/update-noosfero-odbc             usr/bin
+etc/security/limits.d/noosfero-chat     etc/security/limits.d
