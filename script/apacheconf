@@ -35,7 +35,7 @@ when 'virtualhosts'
     puts "  Include /etc/noosfero/apache/virtualhost.conf"
     puts "</VirtualHost>"
   end
-  puts "Include /etc/apache2/sites-available/noosfero.d/*"
+  puts "Include /etc/noosfero/apache.d/*"
   puts "# vim: ft=apache"
 else
   puts "usage: %s mongrel|thin|virtualhosts" % $PROGRAM_NAME
