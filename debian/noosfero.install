@@ -42,3 +42,4 @@ doc/noosfero                      usr/share/noosfero/doc
 
 debian/noosfero-console           usr/sbin
 debian/noosfero-check-dbconfig    usr/sbin
+debian/noosfero-runner            usr/sbin
