@@ -17,6 +17,30 @@ jQuery(function($) {
    Strophe.addNamespace('CHAT_STATES', 'http://jabber.org/protocol/chatstates');
    Strophe.addNamespace('DATA_FORMS', 'jabber:x:data');
 
+   var Archive = {
+     url: '/chat-archive',
+     register: function(to_jid, from_jid, message){
+        jQuery.ajax({
+          type: "POST",
+          url: this.url,
+          dataType: "script",
+          data: {
+            to_jid: to_jid,
+            from_jid: from_jid,
+            message: message,
+            timestamp: timestamp
+          },
+          success: function(data, textStatus, jqXHR){
+            console.log(data);
+          }
+          error: function(data, textStatus, jqXHR){
+            console.log(data);
+          }
+        });
+     },
+     retrieve: function(filters){}
+   }
+
    var Jabber = {
      debug: true,
      connection: null,
@@ -433,6 +457,7 @@ jQuery(function($) {
             .c('active', {xmlns: Strophe.NS.CHAT_STATES});
         Jabber.connection.send(message);
         Jabber.show_message(jid, $own_name, escape_html(body), 'self', Strophe.getNodeFromJid(Jabber.connection.jid));
+        Archive.register(jid, Jabber.connection.jid, body);
      },
 
      is_a_room: function(jid_id) {
