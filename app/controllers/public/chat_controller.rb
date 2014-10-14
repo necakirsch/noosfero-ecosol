@@ -44,6 +44,17 @@ class ChatController < PublicController
     render :nothing => true
   end
 
+  def register_message
+    if request.post?
+      begin
+        ChatMessage.create!(:from => params[:from], :to => params[:to], :message => params[:message])
+        render :text => {:status => 0}.to_json
+      rescue Exception => exception
+        render :text => {:status => 4, :message => exception.to_s, :backtrace => exception.backtrace}.to_json
+      end
+    end
+  end
+
   protected
 
   def check_environment_feature
