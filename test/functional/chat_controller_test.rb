@@ -116,4 +116,67 @@ class ChatControllerTest < ActionController::TestCase
     assert_not_equal chat_status_at, @person.user.chat_status_at
   end
 
+  should 'forbid to register a message without from' do
+    @controller.stubs(:current_user).returns(@person.user)
+    @request.stubs(:xhr?).returns(true)
+
+    post :register_message, {:to =>'mary@example.org', :message => 'Mary, I hate you!'}
+    assert ActiveSupport::JSON.decode(@response.body)['status'] == 1
+  end
+
+  should 'forbid to register a message without to' do
+    @controller.stubs(:current_user).returns(@person.user)
+    @request.stubs(:xhr?).returns(true)
+
+    post :register_message, {:from =>'mary@example.org', :message => 'Mary, I hate you!'}
+    assert ActiveSupport::JSON.decode(@response.body)['status'] == 1
+  end
+
+  should 'forbid to register a message without message' do
+    @controller.stubs(:current_user).returns(@person.user)
+    @request.stubs(:xhr?).returns(true)
+
+    post :register_message, {:to =>'mary@example.org', :from => 'jack@example.org'}
+    assert ActiveSupport::JSON.decode(@response.body)['status'] == 1
+  end
+
+  should 'forbid user to register a message as another user' do
+    @controller.stubs(:current_user).returns(@person.user)
+    @request.stubs(:xhr?).returns(true)
+
+    post :register_message, {:from => 'fake@example.org', :to =>'mary@example.org', :message => 'Mary, I hate you!'}
+    assert ActiveSupport::JSON.decode(@response.body)['status'] == 2
+  end
+
+  should 'forbid user to register a message to a stranger' do
+    @controller.stubs(:current_user).returns(@person.user)
+    @request.stubs(:xhr?).returns(true)
+
+    post :register_message, {:from => @person.jid, :to =>'random@example.org', :message => 'Hello, stranger!'}
+    assert ActiveSupport::JSON.decode(@response.body)['status'] == 3
+  end
+
+  should 'register a message to a friend' do
+    @controller.stubs(:current_user).returns(@person.user)
+    friend = create_user('friend').person
+    @person.add_friend friend
+    @request.stubs(:xhr?).returns(true)
+
+    assert_difference 'ChatMessage.count', 1 do
+      post :register_message, {:from => @person.jid, :to => friend.jid, :message => 'Hey! How is it going?'}
+      assert ActiveSupport::JSON.decode(@response.body)['status'] == 0
+    end
+  end
+
+  should 'register a message to a group' do
+    @controller.stubs(:current_user).returns(@person.user)
+    group = fast_create(Organization)
+    group.add_member(@person)
+    @request.stubs(:xhr?).returns(true)
+
+    assert_difference 'ChatMessage.count', 1 do
+      post :register_message, {:from => @person.jid, :to => friend.jid, :message => 'Hey! How is it going?'}
+      assert ActiveSupport::JSON.decode(@response.body)['status'] == 0
+    end
+  end
 end

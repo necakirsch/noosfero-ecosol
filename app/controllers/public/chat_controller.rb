@@ -2,6 +2,7 @@ class ChatController < PublicController
 
   before_filter :login_required
   before_filter :check_environment_feature
+  before_filter :can_send_message, :only => :register_message
 
   def start_session
     login = user.jid
@@ -64,4 +65,14 @@ class ChatController < PublicController
     end
   end
 
+  def can_send_message
+    return render_json({:status => 1, :message => 'Missing parameters!'}) if params[:from].nil? || params[:to].nil? || params[:message].nil?
+    return render_json({:status => 2, :message => 'You can not send message as another user!'}) if params[:from] != user.jid
+    # TODO Maybe register the jid in a table someday to avoid this below
+    return render_json({:status => 3, :messsage => 'You can not send messages to strangers!'}) if user.friends.where(:identifier => params[:to].split('@').first).blank?
+  end
+
+  def render_json(result)
+    render :text => result.to_json
+  end
 end
