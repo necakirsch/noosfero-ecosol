@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140827191326) do
+ActiveRecord::Schema.define(:version => 20141014205254) do
 
   create_table "abuse_reports", :force => true do |t|
     t.integer  "reporter_id"
@@ -235,6 +235,18 @@ ActiveRecord::Schema.define(:version => 20140827191326) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  create_table "chat_messages", :force => true do |t|
+    t.string   "from"
+    t.string   "to"
+    t.text     "message"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "chat_messages", ["created_at"], :name => "index_chat_messages_on_created_at"
+  add_index "chat_messages", ["from"], :name => "index_chat_messages_on_from"
+  add_index "chat_messages", ["to"], :name => "index_chat_messages_on_to"
 
   create_table "comments", :force => true do |t|
     t.string   "title"
