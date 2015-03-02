@@ -52,6 +52,12 @@
     'profile_data[redirect_l10n]', true, @profile.redirect_l10n
   )%>
 
+  <h2><%= _('Suggestions') %></h2>
+  <%= labelled_check_box(
+    _('Send me relationship suggestions by email'),
+    'profile_data[email_suggestions]', true, @profile.email_suggestions
+  )%>
+
   <%=
     @plugins.dispatch(:profile_editor_extras).map do |content|
       content.kind_of?(Proc) ? self.instance_exec(&content) : content
@@ -61,7 +67,7 @@
   <%= select_categories(:profile_data, _('Select the categories of your interest'), 2) %>
 
   <% button_bar do %>
-    <%= submit_button('save', _('Save'), :cancel => {:action => 'index'}) %>
+    <%= submit_button('save', _('Save'), :cancel => {:action => 'index'}, :option => 'success') %>
     <%= button(:back, _('Back to control panel'), :controller => 'profile_editor') %>
   <% end %>
 
