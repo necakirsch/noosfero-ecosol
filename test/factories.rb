@@ -174,7 +174,11 @@ module Noosfero::Factory
   ###############################################
 
   def defaults_for_environment
-    { :name => 'Environment ' + factory_num_seq.to_s }
+    seq = factory_num_seq
+    {
+      :name => "Environment %d" % seq,
+      :contact_email => "environment%d@example.com" % seq
+    }
   end
 
   ###############################################
@@ -243,7 +247,13 @@ module Noosfero::Factory
   ###############################################
 
   def defaults_for_event
-    { :name => 'My event ' + factory_num_seq.to_s, :start_date => Date.today }
+    num = factory_num_seq.to_s
+    {
+      :name => 'My event ' + num,
+      :slug => 'my-event-' + num,
+      :path => '/my-event-' + num,
+      :start_date => Date.today
+    }
   end
 
   ###############################################

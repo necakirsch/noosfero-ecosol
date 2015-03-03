@@ -10,12 +10,13 @@ class ExternalFeed < ActiveRecord::Base
     { :conditions => ['(fetched_at is NULL) OR (fetched_at < ?)', Time.now - FeedUpdater.update_interval] }
   }
 
-  attr_accessible :address, :enabled
+  attr_accessible :address, :enabled, :only_once
 
   def add_item(title, link, date, content)
-    doc = Hpricot(content)
-    doc.search('*').each do |p|
-      if p.instance_of? Hpricot::Elem
+    return if content.blank?
+    doc = Nokogiri::HTML.fragment content
+    doc.css('*').each do |p|
+      if p.instance_of? Nokogiri::XML::Element
         p.remove_attribute 'style'
         p.remove_attribute 'class'
       end
@@ -25,10 +26,10 @@ class ExternalFeed < ActiveRecord::Base
     article = TinyMceArticle.new
     article.name = title
     article.profile = blog.profile
-    article.body = content 
-    article.published_at = date 
-    article.source = link 
-    article.profile = blog.profile 
+    article.body = content
+    article.published_at = date
+    article.source = link
+    article.profile = blog.profile
     article.parent = blog
     article.author_name = self.feed_title
     unless blog.children.exists?(:slug => article.slug)

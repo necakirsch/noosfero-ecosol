@@ -1,6 +1,7 @@
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
+require 'active_support/dependencies'
 
 # FIXME this silences the warnings about Rails 2.3-style plugins under
 # vendor/plugins, which are deprecated. Hiding those warnings makes it easier
@@ -111,9 +112,10 @@ module Noosfero
     # Make sure the secret is at least 30 characters and all random,
     # no regular words or you'll be exposed to dictionary attacks.
     config.secret_token = noosfero_session_secret
-    config.action_dispatch.session = {
-      :key    => '_noosfero_session',
-    }
+    config.session_store :cookie_store, :key => '_noosfero_session'
+
+    config.paths['db/migrate'] += Dir.glob "#{Rails.root}/{baseplugins,config/plugins}/*/db/migrate"
+    config.i18n.load_path += Dir.glob "#{Rails.root}/{baseplugins,config/plugins}/*/locales/*.{rb,yml}"
 
     Noosfero::Plugin.setup(config)
 

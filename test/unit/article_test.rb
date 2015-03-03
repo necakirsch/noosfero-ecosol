@@ -1,4 +1,5 @@
-require File.dirname(__FILE__) + '/../test_helper'
+# encoding: UTF-8
+require_relative "../test_helper"
 
 class ArticleTest < ActiveSupport::TestCase
 
@@ -770,6 +771,13 @@ class ArticleTest < ActiveSupport::TestCase
     assert_includes as, a
   end
 
+  should 'get tagged with tag that contains special chars' do
+    a = create(Article, :name => 'Published at', :profile_id => profile.id, :tag_list => 'Métodos Ágeis')
+    as = Article.tagged_with('Métodos Ágeis')
+
+    assert_includes as, a
+  end
+
   should 'not get tagged with tag from other environment' do
     article_from_this_environment = create(Article, :profile => profile, :tag_list => 'bli')
 
@@ -1077,10 +1085,11 @@ class ArticleTest < ActiveSupport::TestCase
   end
 
   should 'create the notification to organization and all organization members' do
+    Profile.delete_all
     ActionTracker::Record.delete_all
 
     community = fast_create(Community)
-    member_1 = Person.first
+    member_1 = fast_create(Person)
     community.add_member(member_1)
 
     article = create TinyMceArticle, :name => 'Tracked Article 1', :profile_id => community.id

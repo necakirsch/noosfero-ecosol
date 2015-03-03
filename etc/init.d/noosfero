@@ -115,12 +115,15 @@ do_stop() {
 }
 
 do_restart() {
-  do_stop
-  do_start
+  if running; then
+    main_script restart
+  else
+    do_start
+  fi
 }
 
 running(){
-  pgrep -u noosfero -f 'thin server' > /dev/null
+  main_script running
 }
 
 case "$1" in

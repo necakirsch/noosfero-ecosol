@@ -1,8 +1,20 @@
 // Place your application-specific JavaScript functions and classes here
 // This file is automatically included by javascript_include_tag :defaults
 
+// scope for noosfero stuff
+noosfero = {
+};
+
 function noosfero_init() {
   // focus_first_field(); it is moving the page view when de form is down.
+}
+
+var __noosfero_root = null;
+function noosfero_root() {
+  if (__noosfero_root == null) {
+    __noosfero_root = jQuery('meta[property="noosfero:root"]').attr("content") || '';
+  }
+  return __noosfero_root;
 }
 
 /* If applicable, find the first field in which the user can type and move the
@@ -101,22 +113,24 @@ jQuery.fn.center = function () {
 }
 
 function show_warning(field, message) {
-   new Effect.Highlight(field, {duration:3});
-   $(message).show();
+  jQuery('#'+field).effect('highlight');
+  jQuery('#'+message).show();
 }
 
 function hide_warning(field) {
-   $(field).hide();
+   jQuery('#'+field).hide();
 }
 
 function enable_button(button) {
-   button.enable();
-   button.removeClassName("disabled");
+  button = jQuery(button)
+  button.prop('disabled', false);
+  button.removeClass("disabled");
 }
 
 function disable_button(button) {
-   button.disable();
-   button.addClassName("disabled");
+  button = jQuery(button)
+  button.prop('disabled', true);
+  button.addClass("disabled");
 }
 
 function toggleDisabled(enable, element) {
@@ -150,24 +164,24 @@ function hideOthersIconSelector(current_div) {
 }
 
 function loading(element_id, message) {
-   jQuery(element_id).addClass('loading');
+   jQuery('#'+element_id).addClass('loading');
    if (message) {
-      jQuery(element_id).html(message);
+      jQuery('#'+element_id).html(message);
    }
 }
 function small_loading(element_id, message) {
-   $(element_id).addClassName('small-loading');
+   $('#'+element_id).addClass('small-loading');
    if (message) {
-      $(element_id).update(message);
+      $('#'+element_id).text(message);
    }
 }
 function loading_done(element_id) {
-   jQuery(element_id).removeClass('loading');
-   jQuery(element_id).removeClass('small-loading');
-   jQuery(element_id).removeClass('small-loading-dark');
+   jQuery('#'+element_id).removeClass('loading');
+   jQuery('#'+element_id).removeClass('small-loading');
+   jQuery('#'+element_id).removeClass('small-loading-dark');
 }
 function open_loading(message) {
-   jQuery('body').prepend("<div id='overlay_loading' class='ui-widget-overlay' style='display: none'/><div id='overlay_loading_modal' style='display: none'><p>"+message+"</p><img src='/images/loading-dark.gif'/></div>");
+   jQuery('body').prepend("<div id='overlay_loading' class='ui-widget-overlay' style='display: none'/><div id='overlay_loading_modal' style='display: none'><p>"+message+"</p><img src='" + noosfero_root() + "/images/loading-dark.gif'/></div>");
    jQuery('#overlay_loading').show();
    jQuery('#overlay_loading_modal').center();
    jQuery('#overlay_loading_modal').fadeIn('slow');
@@ -334,8 +348,7 @@ function toggleSubmenu(trigger, title, link_list) {
 }
 
 function toggleMenu(trigger) {
-  hideAllSubmenus();
-  jQuery(trigger).siblings('.simplemenu-submenu').toggle().toggleClass('opened');
+  jQuery(trigger).siblings('.simplemenu-submenu').toggle();
 }
 
 function hideAllSubmenus() {
@@ -506,6 +519,22 @@ function new_qualifier_row(selector, select_qualifiers, delete_button) {
   jQuery(selector).append("<tr><td>" + select_qualifiers + "</td><td id='certifier-area-" + index + "'><select></select>" + delete_button + "</td></tr>");
 }
 
+function userDataCallback(data) {
+  noosfero.user_data = data;
+  if (data.login) {
+    // logged in
+    jQuery('head').append('<meta content="authenticity_token" name="csrf-param" />');
+    jQuery('head').append('<meta content="'+jQuery.cookie("_noosfero_.XSRF-TOKEN")+'" name="csrf-token" />');
+  }
+  if (data.notice) {
+    display_notice(data.notice);
+    // clear notice so that it is not display again in the case this function is called again.
+    data.notice = null;
+  }
+  // Bind this event to do more actions with the user data (for example, inside plugins)
+  jQuery(window).trigger("userDataLoaded", data);
+};
+
 // controls the display of the login/logout stuff
 jQuery(function($) {
   $.ajaxSetup({
@@ -515,48 +544,10 @@ jQuery(function($) {
     }
   });
 
-  $.getJSON('/account/user_data', function userDataCallBack(data) {
-    if (data.login) {
-      // logged in
-      if (data.chat_enabled) {
-        setInterval(function(){ $.getJSON('/account/user_data', chatOnlineUsersDataCallBack)}, 10000);
-      }
-      $('head').append('<meta content="authenticity_token" name="csrf-param" />');
-      $('head').append('<meta content="'+$.cookie("_noosfero_.XSRF-TOKEN")+'" name="csrf-token" />');
-    }
-    if (data.notice) {
-      display_notice(data.notice);
-    }
-    // Bind this event to do more actions with the user data (for example, inside plugins)
-    $(window).trigger("userDataLoaded", data);
-  });
+  var user_data = noosfero_root() + '/account/user_data';
+  $.getJSON(user_data, userDataCallback)
 
-  function chatOnlineUsersDataCallBack(data) {
-    if ($('#chat-online-users').length == 0) {
-      return;
-    }
-    var content = '';
-    $('#chat-online-users .amount_of_friends').html(data['amount_of_friends']);
-    $('#chat-online-users').fadeIn();
-    for (var user in data['friends_list']) {
-      var name = "<span class='friend_name'>%{name}</span>";
-      var avatar = data['friends_list'][user]['avatar'];
-      var jid = data['friends_list'][user]['jid'];
-      var status_name = data['friends_list'][user]['status'] || 'offline';
-      avatar = avatar ? '<img src="' + avatar + '" />' : ''
-        name = name.replace('%{name}',data['friends_list'][user]['name']);
-      open_chat_link = "onclick='open_chat_window(this, \"#" + jid + "\")'";
-      var status_icon = "<div class='chat-online-user-status icon-menu-"+ status_name + "-11'><span>" + status_name + '</span></div>';
-      content += "<li><a href='#' class='chat-online-user' " + open_chat_link + "><div class='chat-online-user-avatar'>" + avatar + '</div>' + name + status_icon + '</a></li>';
-    }
-    content ? $('#chat-online-users-hidden-content ul').html(content) : $('#anyone-online').show();
-    $('#chat-online-users-title').click(function(){
-      if($('#chat-online-users-content').is(':visible'))
-      $('#chat-online-users-content').hide();
-      else
-      $('#chat-online-users-content').show();
-    });
-  }
+  $.ajaxSetup({ cache: false });
 });
 
 // controls the display of contact list
@@ -596,13 +587,6 @@ function display_notice(message) {
    var $noticeBox = jQuery('<div id="notice"></div>').html(message).appendTo('body').fadeTo('fast', 0.8);
    $noticeBox.click(function() { $(this).hide(); });
    setTimeout(function() { $noticeBox.fadeOut('fast'); }, 5000);
-}
-
-function open_chat_window(self_link, anchor) {
-   anchor = anchor || '#';
-   var noosfero_chat_window = window.open('/chat' + anchor,'noosfero_chat','width=900,height=500');
-   noosfero_chat_window.focus();
-   return false;
 }
 
 jQuery(function($) {
@@ -786,7 +770,7 @@ function original_image_dimensions(src) {
 
 function gravatarCommentFailback(img) {
   var link = img.parentNode;
-  link.href = "http://www.gravatar.com";
+  link.href = "//www.gravatar.com";
   img.src = img.getAttribute("data-gravatar");
 }
 
@@ -816,9 +800,12 @@ Array.min = function(array) {
 };
 
 function hideAndGetUrl(link) {
+  document.body.style.cursor = 'wait';
   link.hide();
   url = jQuery(link).attr('href');
-  jQuery.get(url);
+  jQuery.get(url, function( data ) {
+    document.body.style.cursor = 'default';
+  });
 }
 
 jQuery(function($){
@@ -1018,31 +1005,6 @@ log.error = function() {
   window.log.apply(window, jQuery.merge(['error'], arguments));
 }
 
-jQuery(function($) {
-  $('.colorbox').live('click', function() {
-    $.colorbox({
-      href:       $(this).attr('href'),
-      maxWidth:   $(window).width()-50,
-      height:     $(window).height()-50,
-      open:       true,
-      fixed:      true,
-      close:      'Cancel',
-      onComplete: function(bt) {
-        var opt = {}, maxH = $(window).height()-50;
-        if ($('#cboxLoadedContent *:first').height() > maxH) opt.height = maxH;
-        $.colorbox.resize(opt);
-      }
-    });
-    return false;
-  });
-
-  $('.colorbox-close').live('click', function() {
-    $.colorbox.close();
-    return false;
-  });
-
-});
-
 function showHideTermsOfUse() {
   if( jQuery("#article_has_terms_of_use").attr("checked") )
     jQuery("#text_area_terms_of_use").show();
@@ -1053,12 +1015,50 @@ function showHideTermsOfUse() {
   }
 }
 
+jQuery('.profiles-suggestions .explain-suggestion').live('click', function() {
+  var clicked = jQuery(this);
+  clicked.toggleClass('active');
+  clicked.next('.extra_info').toggle();
+  return false;
+});
+
+jQuery('.suggestions-block .block-subtitle').live('click', function() {
+  var clicked = jQuery(this);
+  clicked.next('.profiles-suggestions').toggle();
+  clicked.nextAll('.more-suggestions').toggle();
+  return false;
+});
+
 jQuery(document).ready(function(){
   showHideTermsOfUse();
 
   jQuery("#article_has_terms_of_use").click(function(){
     showHideTermsOfUse();
   });
+
+  // Suggestions on search inputs
+  (function($) {
+    var suggestions_cache = {};
+    $(".search-input-with-suggestions").autocomplete({
+      minLength: 2,
+      select: function(event, ui){
+        $(this).val(ui.item.value);
+        $(this).closest('form').submit();
+      },
+      source: function(request, response) {
+        var term = request.term.toLowerCase();
+        if (term in suggestions_cache) {
+          response(suggestions_cache[term]);
+          return;
+        }
+        request["asset"] = this.element.data("asset");
+        $.getJSON("/search/suggestions", request, function(data, status, xhr) {
+          suggestions_cache[term] = data;
+          response(data);
+        });
+      }
+    });
+  })(jQuery);
 });
 
 function apply_zoom_to_images(zoom_text) {
@@ -1083,3 +1083,49 @@ function apply_zoom_to_images(zoom_text) {
     });
   });
 }
+
+function notifyMe(title, options) {
+  // This might be useful in the future
+  //
+  // Let's check if the browser supports notifications
+  // if (!("Notification" in window)) {
+  //   alert("This browser does not support desktop notification");
+  // }
+
+  // Let's check if the user is okay to get some notification
+  var notification = null;
+  if (Notification.permission === "granted") {
+    // If it's okay let's create a notification
+    notification = new Notification(title, options);
+  }
+
+  // Otherwise, we need to ask the user for permission
+  // Note, Chrome does not implement the permission static property
+  // So we have to check for NOT 'denied' instead of 'default'
+  else if (Notification.permission !== 'denied') {
+    Notification.requestPermission(function (permission) {
+      // Whatever the user answers, we make sure we store the information
+      if (!('permission' in Notification)) {
+        Notification.permission = permission;
+      }
+
+      // If the user is okay, let's create a notification
+      if (permission === "granted") {
+	notification = new Notification(title, options);
+      }
+    });
+  }
+  return notification;
+  // At last, if the user already denied any notification, and you
+  // want to be respectful there is no need to bother them any more.
+}
+
+function start_fetching(element){
+  jQuery(element).append('<div class="fetching-overlay">Loading...</div>');
+}
+
+function stop_fetching(element){
+  jQuery('.fetching-overlay', element).remove();
+}
+
+window.isHidden = function isHidden() { return (typeof(document.hidden) != 'undefined') ? document.hidden : !document.hasFocus() };

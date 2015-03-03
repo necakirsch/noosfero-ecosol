@@ -16,9 +16,7 @@ class ProfileController < PublicController
       @activities = @profile.activities.paginate(:per_page => 15, :page => params[:page])
     end
     @tags = profile.article_tags
-    unless profile.display_info_to?(user)
-      profile.visible? ? private_profile : invisible_profile
-    end
+    allow_access_to_page
   end
 
   def tags
@@ -61,13 +59,13 @@ class ProfileController < PublicController
 
   def friends
     if is_cache_expired?(profile.friends_cache_key(params))
-      @friends = profile.friends.includes(relations_to_include).paginate(:per_page => per_page, :page => params[:npage])
+      @friends = profile.friends.includes(relations_to_include).paginate(:per_page => per_page, :page => params[:npage], :total_entries => profile.friends.count)
     end
   end
 
   def members
     if is_cache_expired?(profile.members_cache_key(params))
-      @members = profile.members_by_name.includes(relations_to_include).paginate(:per_page => members_per_page, :page => params[:npage])
+      @members = profile.members_by_name.includes(relations_to_include).paginate(:per_page => members_per_page, :page => params[:npage], :total_entries => profile.members.count)
     end
   end
 
@@ -315,7 +313,7 @@ class ProfileController < PublicController
         abuse_report = AbuseReport.new(params[:abuse_report])
         if !params[:content_type].blank?
           article = params[:content_type].constantize.find(params[:content_id])
-          abuse_report.content = instance_eval(&article.reported_version)
+          abuse_report.content = article_reported_version(article)
         end
 
         user.register_report(abuse_report, profile)
@@ -389,16 +387,6 @@ class ProfileController < PublicController
       redirect_to back
     else
       redirect_to profile.url
-    end
-  end
-
-  def private_profile
-    private_profile_partial_parameters
-  end
-
-  def invisible_profile
-    unless profile.is_template?
-      render_access_denied(_("This profile is inaccessible. You don't have the permission to view the content here."), _("Oops ... you cannot go ahead here"))
     end
   end
 
