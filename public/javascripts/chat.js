@@ -266,7 +266,7 @@ jQuery(function($) {
           url: '/chat/roster_groups',
           dataType: 'json',
           success: function(data){
-            data.each(function(room){
+            $(data).each(function(index, room){
               var jid_id = Jabber.jid_to_id(room.jid);
               Jabber.jids[jid_id] = {jid: room.jid, name: room.name, type: 'groupchat'};
               //FIXME This must check on session if the user is inside the room...
@@ -546,8 +546,7 @@ jQuery(function($) {
      if (e.keyCode == 13) {
         var jid = $(this).attr('data-to');
         var body = $(this).val();
-        body = body.stripScripts();
-        save_message(jid, body);
+        body = $('<div>'+ body +'</div>').find('script,noscript,style').remove().end().html();
         Jabber.deliver_message(jid, body);
         $(this).val('');
         return false;
@@ -556,7 +555,7 @@ jQuery(function($) {
 
    function save_message(jid, body) {
       $.post('/chat/save_message', {
-        to: jid,
+        to: getIdentifier(jid),
         body: body
       });
    }
