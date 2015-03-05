@@ -556,7 +556,7 @@ jQuery(function($) {
 
    function save_message(jid, body) {
       $.post('/chat/save_message', {
-        to: getIdentifier(jid),
+        to: jid,
         body: body
       }, function(data){
         if(data.status > 0){

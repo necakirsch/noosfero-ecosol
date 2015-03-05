@@ -64,7 +64,7 @@ class ChatController < PublicController
 
   def save_message
     if request.post?
-      to = environment.profiles.find_by_identifier(params[:to])
+      to = environment.profiles.where(:jid => params[:to]).first
       body = params[:body]
 
       begin
