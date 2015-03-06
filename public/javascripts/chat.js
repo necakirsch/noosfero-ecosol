@@ -466,6 +466,14 @@ jQuery(function($) {
      },
 
      connect: function() {
+       if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+         Notification.requestPermission(function (permission) {
+           if (!('permission' in Notification)) {
+             Notification.permission = permission;
+           }
+         });
+       }
+
         if (Jabber.connection && Jabber.connection.connected) {
            Jabber.send_availability_status(Jabber.presence_status);
         }
@@ -498,6 +506,7 @@ jQuery(function($) {
             .c('active', {xmlns: Strophe.NS.CHAT_STATES});
         Jabber.connection.send(message);
         Jabber.show_message(jid, $own_name, escape_html(body), 'self', Strophe.getNodeFromJid(Jabber.connection.jid));
+        save_message(jid, body);
         move_conversation_to_the_top(jid);
      },
 
@@ -539,7 +548,6 @@ jQuery(function($) {
         var jid = $(this).attr('data-to');
         var body = $(this).val();
         body = body.stripScripts();
-        save_message(jid, body);
         Jabber.deliver_message(jid, body);
         $(this).val('');
         return false;
@@ -548,8 +556,15 @@ jQuery(function($) {
 
    function save_message(jid, body) {
       $.post('/chat/save_message', {
-        to: getIdentifier(jid),
+        to: jid,
         body: body
+      }, function(data){
+        if(data.status > 0){
+          console.log(data.message);
+          if(data.backtrace) console.log(data.backtrace);
+        }
+      }).fail(function(){
+        console.log('500 - Internal server error.')
       });
    }
 
@@ -612,7 +627,7 @@ jQuery(function($) {
 
    function open_conversation(jid) {
      var conversation = load_conversation(jid);
-     var jid_id = $(this).attr('id');
+     var jid_id = Jabber.jid_to_id(jid);
 
      $('.conversation').hide();
      conversation.show();
@@ -746,9 +761,9 @@ jQuery(function($) {
    }
 
    function update_total_unread_messages() {
-      var total_unread = $('#openchat .unread-messages');
+      var total_unread = $('#unread-messages');
       var sum = 0;
-      $('.buddies .unread-messages').each(function() {
+      $('#chat .unread-messages').each(function() {
          sum += Number($(this).text());
       });
       if(sum>0) {
@@ -872,5 +887,11 @@ jQuery(function($) {
     var jid = $(this).data('jid');
     Jabber.leave_room(jid);
   });
+
+  $('.open-conversation').live('click', function(){
+    open_conversation($(this).data('jid'));
+    return false;
+  });
+
 
 });
