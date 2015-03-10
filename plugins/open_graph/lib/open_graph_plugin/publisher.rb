@@ -27,9 +27,16 @@ class OpenGraphPlugin::Publisher
     raise 'abstract method called'
   end
 
-  def url_for url
+  def url_for url, extra_params={}
     return url if url.is_a? String
-    Noosfero::Application.routes.url_helpers.url_for url.except(:port)
+    url.delete :port
+    url.merge! extra_params
+    Noosfero::Application.routes.url_helpers.url_for url
+  end
+
+  def passive_url_for url, story_defs
+    object_type = self.objects[story_defs[:object_type]]
+    url_for url, og_type: "#{MetadataPlugin::og_config[:namespace]}:#{object_type}"
   end
 
   def publish_stories object_data, actor, stories
@@ -40,6 +47,7 @@ class OpenGraphPlugin::Publisher
 
   def publish_story object_data, actor, story
     defs = OpenGraphPlugin::Stories::Definitions[story]
+    passive = defs[:passive]
 
     print_debug "open_graph: publish_story #{story}" if debug? actor
     match_criteria = if criteria = defs[:criteria] then criteria.call(object_data, actor) else true end
@@ -58,9 +66,10 @@ class OpenGraphPlugin::Publisher
         publish.call actor, object_data, self
       else
         object_data_url = if object_data_url = defs[:object_data_url] then object_data_url.call(object_data) else object_data.url end
-        object_data_url = self.url_for object_data_url
+        object_data_url = if passive then self.passive_url_for object_data_url, defs else self.url_for object_data_url end
 
         actors.each do |actor|
+          print_debug "open_graph: start publishing" if debug? actor
           self.publish actor, defs, object_data_url
         end
       end
@@ -79,15 +88,15 @@ class OpenGraphPlugin::Publisher
     passive = story_defs[:passive]
     if passive
       track_configs.each do |c|
-        trackers.concat c.trackers_of_profile(profile)
+        trackers.concat c.trackers_to_profile(profile)
       end.flatten
 
       trackers.select! do |t|
-        track_configs.any?{ |c| c.enabled_for self.context, t }
+        track_configs.any?{ |c| c.enabled? self.context, t }
       end
     else #active
       match_track = profile.person? and track_configs.any? do |c|
-        c.enabled_for(self.context, actor) and
+        c.enabled?(self.context, actor) and
           actor.send("open_graph_#{c.track_name}_track_configs").where(object_type: story_defs[:object_type]).first
       end
       trackers << actor if match_track
