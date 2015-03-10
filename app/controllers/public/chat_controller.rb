@@ -2,6 +2,7 @@ class ChatController < PublicController
 
   before_filter :login_required
   before_filter :check_environment_feature
+  before_filter :can_send_message, :only => :save_message
 
   def start_session
     login = user.jid
@@ -62,11 +63,17 @@ class ChatController < PublicController
   end
 
   def save_message
-    to = environment.profiles.find_by_identifier(params[:to])
-    body = params[:body]
+    if request.post?
+      to = environment.profiles.where(:jid => params[:to]).first
+      body = params[:body]
 
-    ChatMessage.create!(:to => to, :from => user, :body => body)
-    render :text => 'ok'
+      begin
+        ChatMessage.create!(:to => to, :from => user, :body => body)
+        return render_json({:status => 0})
+      rescue Exception => exception
+        return render_json({:status => 3, :message => exception.to_s, :backtrace => exception.backtrace})
+      end
+    end
   end
 
   def recent_messages
@@ -108,4 +115,15 @@ class ChatController < PublicController
     end
   end
 
+  def can_send_message
+    return render_json({:status => 1, :message => 'Missing parameters!'}) if params[:to].nil? || params[:body].nil?
+    # TODO Maybe register the jid in a table someday to avoid this below
+    if user.friends.where(:identifier => params[:to]).blank? && user.memberships.where(:identifier => params[:to]).blank?
+      return render_json({:status => 2, :messsage => 'You can not send messages to strangers!'})
+    end
+  end
+
+  def render_json(result)
+    render :text => result.to_json
+  end
 end
