@@ -266,7 +266,7 @@ jQuery(function($) {
           url: '/chat/roster_groups',
           dataType: 'json',
           success: function(data) {
-            jQuery(data).each(function(room){
+            jQuery(data).each(function(index, room){
               var jid_id = Jabber.jid_to_id(room.jid);
               Jabber.jids[jid_id] = {jid: room.jid, name: room.name, type: 'groupchat'};
               //FIXME This must check on session if the user is inside the room...
