@@ -547,8 +547,7 @@ jQuery(function($) {
      if (e.keyCode == 13) {
         var jid = $(this).attr('data-to');
         var body = $(this).val();
-        body = jQuery(body).find('script').remove();
-        body = body.html()
+        body = jQuery(body).find('script').remove().end().html();
         save_message(jid, body);
         Jabber.deliver_message(jid, body);
         $(this).val('');
