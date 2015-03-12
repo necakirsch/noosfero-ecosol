@@ -732,7 +732,7 @@ jQuery(function($) {
    function load_defaults() {
      $.getJSON('/chat/my_session', {}, function(data) {
        $.each(data.rooms, function(i, room_jid) {
-         $('#chat').trigger('opengroup', room_jid);
+         load_conversation(room_jid);
        })
 
        $('#'+data.tab_id).click();
